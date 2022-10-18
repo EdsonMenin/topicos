@@ -1,6 +1,7 @@
 package com.example.topicos.service;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,10 @@ public class RootServersService {
 	@Value("${topicos.url}")
 	private String atlasUrl;
 	
-	public String calculateInfos( String rootServer, String dateInitial, String dateFinal ) {
+	public String calculateInfos( String rootServer, Date date ) {
+		
+		Long dateInitial = date.getTime();
+		Long dateFinal = date.getTime() + 300;
 		
 		ArrayList<String> list = retrieveRootServer(rootServer);
  
@@ -30,15 +34,15 @@ public class RootServersService {
 		return null;
 	}
 
-	public JSONArray retrieveMeasurements( String rootServer, String dateInitial, String dateFinal ) {
+	public JSONArray retrieveMeasurements( String rootServer, Long dateInitial, Long dateFinal ) {
 		
 		HttpResponse<String> response = Unirest.get( atlasUrl + "/api/v2/measurements/{rootServer}"
 															  + "/results/?start={dateInitial}"
 															  + "&stop={dateFinal}"
 															  + "&format=json")
 											.routeParam("rootServer", rootServer)
-											.routeParam("dateInitial", dateInitial)
-											.routeParam("dateFinal", dateFinal)
+											.routeParam("dateInitial", String.valueOf( dateInitial ))
+											.routeParam("dateFinal", String.valueOf( dateFinal ))
 											.asString();
 		
 		return new JSONArray( response.getBody() );
