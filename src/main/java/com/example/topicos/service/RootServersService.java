@@ -1,7 +1,10 @@
 package com.example.topicos.service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -16,10 +19,15 @@ public class RootServersService {
 	@Value("${topicos.url}")
 	private String atlasUrl;
 	
-	public String calculateInfos( String rootServer, Date date ) {
+	public String calculateInfos( String rootServer, String date ) {
 		
-		Long dateInitial = date.getTime();
-		Long dateFinal = date.getTime() + 300;
+		DateTimeFormatter formatter = 
+		        DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm", Locale.ENGLISH);
+		LocalDateTime dateFormated = LocalDateTime.parse(date, formatter);
+		
+		ZoneId zoneId = ZoneId.systemDefault();
+		Long dateInitial = dateFormated.atZone(zoneId).toEpochSecond();
+		Long dateFinal = dateFormated.atZone(zoneId).toEpochSecond() + 300;
 		
 		ArrayList<String> list = retrieveRootServer(rootServer);
  

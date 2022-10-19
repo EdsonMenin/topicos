@@ -14,13 +14,67 @@
         <p>Os dados correspondem em ate 5 minutos apos o horario escolhido!</p>
         <form>
 		    <div>
-		        <label for="student-birth-date">Date para calculo:</label>
-		        <input type="datetime-local" id="student-birth-date"/>
+		    	<label for="rootServer">Root Server:</label>
+		        <select id="rootServer">
+				    <option value="a">A</option>
+				    <option value="b">B</option>
+				    <option value="c">C</option>
+				    <option value="d">D</option>
+				    <option value="e">E</option>
+				    <option value="f">F</option>
+				    <option value="g">G</option>
+				    <option value="h">H</option>
+				    <option value="i">I</option>
+				    <option value="j">J</option>
+				    <option value="k">K</option>
+				    <option value="l">L</option>
+				    <option value="m">M</option>
+				</select>
+		    </div>
+		    <div>    
+		        <label for="initialDate">Date para calculo:</label>
+		        <input type="datetime-local" id="initialDate"/>
 		    </div>
 		    <div>
-		        <button type="submit" class="button">Calcular</button>
+		        <input type="button" value="Calcular" onclick="mountReport()">
 		    </div>
 		</form>
     </div>
+    <script>
+
+	    function mountReport() {
+	    	
+	    	var initialdate = window.document.getElementById('initialDate');
+	    	var rootServer = window.document.getElementById('rootServer');
+	    	
+	    	console.log(initialdate.value);
+	    	console.log(rootServer.value);
+	    	
+	    	getJSON('http://localhost:8180/rootServers/dns/' + rootServer.value +'/' + initialdate.value ,
+    			function(err, data) {
+    			  if (err !== null) {
+    			    alert('Something went wrong: ' + err);
+    			  } else {
+    			    alert('Your query count: ' + data );
+    			  }
+    			});
+	    }
+
+		var getJSON = function(url, callback) {
+		    var xhr = new XMLHttpRequest();
+		    xhr.open('GET', url, true);
+		    xhr.responseType = 'json';
+		    xhr.onload = function() {
+		      var status = xhr.status;
+		      if (status === 200) {
+		        callback(null, xhr.response);
+		      } else {
+		        callback(status, xhr.response);
+		      }
+		    };
+		    xhr.send();
+		};
+	
+	</script>
 </body>
 </html>

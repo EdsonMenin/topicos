@@ -1,7 +1,5 @@
 package com.example.topicos.controller;
 
-import java.util.Date;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,9 +16,9 @@ public class RootServersController {
 	@Autowired
 	RootServersService rootServersService;
 	
-	@GetMapping("/dns/{rootServer}/{dateInitial}/{dateFinal}")
+	@GetMapping("/dns/{rootServer}/{date}")
 	public ResponseEntity<Object> dns( 	@PathVariable String rootServer,
-										@PathVariable Date date )
+										@PathVariable String date )
 	{
 		try {
 			return ResponseEntity.ok(
