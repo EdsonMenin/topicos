@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
 import kong.unirest.json.JSONArray;
+import kong.unirest.json.JSONObject;
 
 @Service
 public class RootServersService {
@@ -38,8 +39,86 @@ public class RootServersService {
 	}
 	
 	private String mountReport(JSONArray responseIpv4, JSONArray responseIpv6) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		JSONObject ret = new JSONObject();
+		
+		Long quantResultsIPV4 = 0l;
+		Long quantResultsIPV6 = 0l;
+		Long failResultsIPV4 = 0l;
+		Long failResultsIPV6 = 0l;
+
+	    for (int i = 0 ; i < responseIpv4.length(); i++) {
+	    	
+	        JSONObject obj = responseIpv4.getJSONObject(i);
+	        JSONObject result = obj.has("result") ? obj.getJSONObject("result") : new JSONObject();
+	        
+	        if( result.isEmpty() ) {
+	        	failResultsIPV4++;
+	        	continue;
+	        }
+	        
+	        JSONArray answers  = result.has("answers") ? result.getJSONArray("answers") : new JSONArray();
+	        
+	        if( answers.isEmpty() ) {
+	        	failResultsIPV4++;
+	        	continue;
+	        }
+	        
+	        JSONObject arrAnsewrs = answers.getJSONObject(0);
+	        
+	        if( arrAnsewrs.isEmpty() ) {
+	        	failResultsIPV4++;
+	        	continue;
+	        }
+	        
+	        String serverName  = arrAnsewrs.has("RDATA") ? arrAnsewrs.getString("RDATA") : "";
+	        
+	        ret.put("serverName", serverName);
+	        
+	        quantResultsIPV4++;
+	        
+	    }
+	    
+	    for (int i = 0 ; i < responseIpv6.length(); i++) {
+	    	
+	    	JSONObject obj = responseIpv4.getJSONObject(i);
+	        JSONObject result = obj.has("result") ? obj.getJSONObject("result") : new JSONObject();
+	        
+	        if( result.isEmpty() ) {
+	        	failResultsIPV6++;
+	        	continue;
+	        }
+	        
+	        JSONArray answers  = result.has("answers") ? result.getJSONArray("answers") : new JSONArray();
+	        
+	        if( answers.isEmpty() ) {
+	        	failResultsIPV6++;
+	        	continue;
+	        }
+	        
+	        JSONObject arrAnsewrs = answers.getJSONObject(0);
+	        
+	        if( arrAnsewrs.isEmpty() ) {
+	        	failResultsIPV6++;
+	        	continue;
+	        }
+	        
+	        String serverName  = arrAnsewrs.has("RDATA") ? arrAnsewrs.getString("RDATA") : "";
+	        
+	        ret.put("serverName", serverName);
+	        
+	        quantResultsIPV6++;
+	    }
+	    
+	    ret.put("quantResultsIPV4", quantResultsIPV4);
+	    ret.put("quantResultsIPV6", quantResultsIPV6);
+	    ret.put("quantResultsTotal", quantResultsIPV4 + quantResultsIPV6);
+	    ret.put("failResultsIPV4", failResultsIPV4);
+	    ret.put("failResultsIPV6", failResultsIPV6);
+	    ret.put("quantFailsTotal", failResultsIPV4 + quantResultsIPV6);
+	    
+		
+		return ret.toString();
 	}
 
 	public JSONArray retrieveMeasurements( String rootServer, Long dateInitial, Long dateFinal ) {
@@ -62,56 +141,56 @@ public class RootServersService {
 		
 		switch (rootServer) {
 			case "a":
-				list.add("10310");
-				list.add("11310");
+				list.add("10309");
+				list.add("11309");
 				break;
 			case "b":
 				list.add("10310");
 				list.add("11310");
 				break;
 			case "c":
-				list.add("10310");
-				list.add("11310");
+				list.add("10311");
+				list.add("11311");
 				break;
 			case "d":
-				list.add("10310");
-				list.add("11310");
+				list.add("10312");
+				list.add("11312");
 				break;
 			case "e":
-				list.add("10310");
-				list.add("11310");
+				list.add("10313");
+				list.add("11313");
 				break;
 			case "f":
-				list.add("10310");
-				list.add("11310");
+				list.add("10304");
+				list.add("11304");
 				break;
 			case "g":
-				list.add("10310");
-				list.add("11310");
+				list.add("10314");
+				list.add("11314");
 				break;
 			case "h":
-				list.add("10310");
-				list.add("11310");
+				list.add("10315");
+				list.add("11315");
 				break;
 			case "i":
-				list.add("10310");
-				list.add("11310");
+				list.add("10305");
+				list.add("11305");
 				break;
 			case "j":
-				list.add("10310");
-				list.add("11310");
+				list.add("10316");
+				list.add("11316");
 				break;
 			case "k":
-				list.add("10310");
-				list.add("11310");
+				list.add("10301");
+				list.add("11301");
 				break;
 			case "l":
-				list.add("10310");
-				list.add("11310");
+				list.add("10308");
+				list.add("11308");
 				break;
 			case "m":
-				list.add("10310");
-				list.add("11310");
+				list.add("10306");
+				list.add("11306");
 				break;
 		}
 		return list;
