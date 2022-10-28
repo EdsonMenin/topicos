@@ -38,24 +38,72 @@
 		    <div>
 		        <input type="button" value="Calcular" onclick="mountReport()">
 		    </div>
+		    
+		    <div id="chart_div"></div>
+		    
+		    <div id="piechart"></div>
+		    
 		</form>
     </div>
     <script>
+    
+	    google.charts.load('current', {'packages':['corechart']});
+	    
+	    function drawChart( infos ) {
+
+	        var data = new google.visualization.DataTable();
+	        data.addColumn('string', 'Topping');
+	        data.addColumn('number', 'Slices');
+	        data.addRows([
+	            ['Total em falhas IPV4', infos.infos.failResultsIPV4],
+	            ['Total em falhas IPV6', infos.infos.failResultsIPV6],
+	            ['Total de acertos IPV4', infos.infos.quantResultsIPV4],
+	            ['Total de acertos IPV6', infos.infos.quantResultsIPV6]
+	        ]);
+
+	        var options = {'title':'Trafego da rede',
+	            'width':600,
+	            'height':400};
+
+	        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+	        chart.draw(data, options);
+	    }
+	    
+	    function drawColumnChart( infos ) {
+	    	
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Year');
+            data.addColumn('number', 'Views');
+            Object.keys(infos.distinctServers).forEach(function(key) {
+                data.addRow([ infos.distinctServers[key].server, infos.distinctServers[key].count ]);
+            });
+            var options = {
+                title : 'Distribuicaoo do trafego',
+                hAxis : {
+                    title : 'Servidor',
+                },
+                vAxis : {
+                    title : 'Quantidade'
+                },
+                'width':800,
+	            'height':400
+            };
+            var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+            chart.draw(data, options);
+        }
 
 	    function mountReport() {
 	    	
 	    	var initialdate = window.document.getElementById('initialDate');
 	    	var rootServer = window.document.getElementById('rootServer');
 	    	
-	    	console.log(initialdate.value);
-	    	console.log(rootServer.value);
-	    	
 	    	getJSON('http://localhost:8180/rootServers/dns/' + rootServer.value +'/' + initialdate.value ,
     			function(err, data) {
     			  if (err !== null) {
-    			    alert('Something went wrong: ' + err);
+    			    alert('Erro ao processar os dados');
     			  } else {
-    			    alert('Your query count: ' + data );
+    				  drawChart(data);
+    				  drawColumnChart(data);
     			  }
     			});
 	    }
