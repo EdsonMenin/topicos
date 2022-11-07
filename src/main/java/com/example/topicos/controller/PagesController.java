@@ -9,9 +9,21 @@ import org.springframework.web.servlet.ModelAndView;
 @RequestMapping("/")
 public class PagesController {
 	
+	@GetMapping("/home")
+	public ModelAndView home()
+	{
+		return new ModelAndView("home");
+	}
+	
 	@GetMapping("/report")
 	public ModelAndView report()
 	{
 		return new ModelAndView("report");
+	}
+	
+	@GetMapping("/prob")
+	public ModelAndView prob()
+	{
+		return new ModelAndView("prob");
 	}
 }

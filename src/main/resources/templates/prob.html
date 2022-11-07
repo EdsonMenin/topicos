@@ -1,0 +1,128 @@
+<!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="ISO-8859-1">
+<title>Relatorio de dados DNS Atlas Ripe</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+</head>
+<body>
+    <div align="center">
+    	<h1>Relatorio de dados DNS Atlas Ripe</h1>
+        <h2>Trabalho II - DNS parte 2</h2>
+        <p>Os dados correspondem em ate 5 minutos apos o horario escolhido!</p>
+        <form>
+		    <div>
+		    	<label for="rootServer">Root Server:</label>
+		        <select id="rootServer">
+				    <option value="a">A</option>
+				    <option value="b">B</option>
+				    <option value="c">C</option>
+				    <option value="d">D</option>
+				    <option value="e">E</option>
+				    <option value="f">F</option>
+				    <option value="g">G</option>
+				    <option value="h">H</option>
+				    <option value="i">I</option>
+				    <option value="j">J</option>
+				    <option value="k">K</option>
+				    <option value="l">L</option>
+				    <option value="m">M</option>
+				</select>
+		    </div>
+		    <div>    
+		        <label for="initialDate">Date para calculo:</label>
+		        <input type="datetime-local" id="initialDate"/>
+		    </div>
+		    <div>
+		        <input type="button" value="Calcular" onclick="mountReport()">
+		    </div>
+		    
+		    <div id="chart_div"></div>
+		    
+		    <div id="piechart"></div>
+		    
+		</form>
+    </div>
+    <script>
+    
+	    google.charts.load('current', {'packages':['corechart']});
+	    
+	    function drawChart( infos ) {
+
+	        var data = new google.visualization.DataTable();
+	        data.addColumn('string', 'Topping');
+	        data.addColumn('number', 'Slices');
+	        data.addRows([
+	            ['Total em falhas IPV4', infos.infos.failResultsIPV4],
+	            ['Total em falhas IPV6', infos.infos.failResultsIPV6],
+	            ['Total de acertos IPV4', infos.infos.quantResultsIPV4],
+	            ['Total de acertos IPV6', infos.infos.quantResultsIPV6]
+	        ]);
+
+	        var options = {'title':'Trafego da rede',
+	            'width':600,
+	            'height':400};
+
+	        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+	        chart.draw(data, options);
+	    }
+	    
+	    function drawColumnChart( infos ) {
+	    	
+            var data = new google.visualization.DataTable();
+            data.addColumn('string', 'Year');
+            data.addColumn('number', 'Views');
+            Object.keys(infos.distinctServers).forEach(function(key) {
+                data.addRow([ infos.distinctServers[key].server, infos.distinctServers[key].count ]);
+            });
+            var options = {
+                title : 'Distribuicaoo do trafego',
+                hAxis : {
+                    title : 'Servidor',
+                },
+                vAxis : {
+                    title : 'Quantidade'
+                },
+                'width':800,
+	            'height':400
+            };
+            var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
+            chart.draw(data, options);
+        }
+
+	    function mountReport() {
+	    	
+	    	var initialdate = window.document.getElementById('initialDate');
+	    	var rootServer = window.document.getElementById('rootServer');
+	    	
+	    	getJSON('http://localhost:8180/rootServers/prob/' + rootServer.value +'/' + initialdate.value ,
+    			function(err, data) {
+    			  if (err !== null) {
+    			    alert('Erro ao processar os dados');
+    			  } else {
+    				  drawChart(data);
+    				  drawColumnChart(data);
+    			  }
+    			});
+	    }
+
+		var getJSON = function(url, callback) {
+		    var xhr = new XMLHttpRequest();
+		    xhr.open('GET', url, true);
+		    xhr.responseType = 'json';
+		    xhr.onload = function() {
+		      var status = xhr.status;
+		      if (status === 200) {
+		        callback(null, xhr.response);
+		      } else {
+		        callback(status, xhr.response);
+		      }
+		    };
+		    xhr.send();
+		};
+	
+	</script>
+</body>
+</html>

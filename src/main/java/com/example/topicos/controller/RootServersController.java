@@ -27,4 +27,16 @@ public class RootServersController {
 			return ResponseEntity.internalServerError().build();
 		}
 	}
+	
+	@GetMapping("/prob/{rootServer}/{date}")
+	public ResponseEntity<Object> prob( @PathVariable String rootServer,
+										@PathVariable String date)
+	{
+		try {
+			return ResponseEntity.ok(
+					rootServersService.calculateInfosProb( rootServer, date ));
+		} catch (Exception e) {
+			return ResponseEntity.internalServerError().build();
+		}
+	}
 }
