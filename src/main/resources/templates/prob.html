@@ -1,11 +1,24 @@
 <!DOCTYPE html SYSTEM "http://www.thymeleaf.org/dtd/xhtml1-strict-thymeleaf-4.dtd">
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="ISO-8859-1">
-<title>Relatorio de dados DNS Atlas Ripe</title>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+	<style>
+       .container .box {
+          display:table;
+       }
+       .container .box .box-row {
+           display:table-row;
+        }
+       .container .box .box-cell {
+           display:table-cell;
+           width:25%;
+           padding:10px;
+       }
+	</style>
+	<meta charset="ISO-8859-1">
+	<title>Relatorio de dados DNS Atlas Ripe</title>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+	<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
 </head>
 <body>
     <div align="center">
@@ -38,59 +51,143 @@
 		    <div>
 		        <input type="button" value="Calcular" onclick="mountReport()">
 		    </div>
-		    
-		    <div id="chart_div"></div>
-		    
-		    <div id="piechart"></div>
-		    
 		</form>
+	</div>
+    <div class="container">
+    	<div class="box">
+    		<div class="box-row">
+    			<div class="box-cell box1" id="piechartipv4"></div>
+    			<div class="box-cell box2" id="piechartipv6"></div>
+    		</div>
+    	</div>
+    </div>
+    <div class="container">
+    	<div class="box">
+    		<div class="box-row">
+    			<div class="box-cell box1_2" id="piechartipv4_2"></div>
+    			<div class="box-cell box2_2" id="piechartipv6_2"></div>
+    		</div>
+    	</div>
+    </div>
+    <div class="container">
+    	<div class="box">
+    		<div class="box-row">
+    			<div class="box-cell box2_3" id="piechartipv4_3"></div>
+    			<div class="box-cell box2_3" id="piechartipv6_3"></div>
+    		</div>
+    	</div>
     </div>
     <script>
     
 	    google.charts.load('current', {'packages':['corechart']});
 	    
-	    function drawChart( infos ) {
+	    function drawChartIpv4( infos ) {
 
 	        var data = new google.visualization.DataTable();
 	        data.addColumn('string', 'Topping');
 	        data.addColumn('number', 'Slices');
 	        data.addRows([
-	            ['Total em falhas IPV4', infos.infos.failResultsIPV4],
-	            ['Total em falhas IPV6', infos.infos.failResultsIPV6],
-	            ['Total de acertos IPV4', infos.infos.quantResultsIPV4],
-	            ['Total de acertos IPV6', infos.infos.quantResultsIPV6]
+	            ['Conecta em outros paises IPV4', infos.percentOtherContriesIPV4],
+	            ['Conecta no mesmo pais IPV4', infos.percentSameContriesIPV4]
 	        ]);
 
-	        var options = {'title':'Trafego da rede',
+	        var options = {'title':'IPV4',
 	            'width':600,
 	            'height':400};
 
-	        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+	        var chart = new google.visualization.PieChart(document.getElementById('piechartipv4'));
 	        chart.draw(data, options);
 	    }
 	    
-	    function drawColumnChart( infos ) {
-	    	
-            var data = new google.visualization.DataTable();
-            data.addColumn('string', 'Year');
-            data.addColumn('number', 'Views');
-            Object.keys(infos.distinctServers).forEach(function(key) {
-                data.addRow([ infos.distinctServers[key].server, infos.distinctServers[key].count ]);
-            });
-            var options = {
-                title : 'Distribuicaoo do trafego',
-                hAxis : {
-                    title : 'Servidor',
-                },
-                vAxis : {
-                    title : 'Quantidade'
-                },
-                'width':800,
-	            'height':400
-            };
-            var chart = new google.visualization.ColumnChart(document.getElementById('chart_div'));
-            chart.draw(data, options);
-        }
+	    function drawChartIpv6( infos ) {
+
+	        var data = new google.visualization.DataTable();
+	        data.addColumn('string', 'Topping');
+	        data.addColumn('number', 'Slices');
+	        data.addRows([
+	            ['Conecta em outros paises IPV6', infos.percentOtherContriesIPV6],
+	            ['Conecta no mesmo pais IPV6', infos.percentSameContriesIPV6]
+	        ]);
+
+	        var options = {'title':'IPV6',
+	            'width':600,
+	            'height':400};
+
+	        var chart = new google.visualization.PieChart(document.getElementById('piechartipv6'));
+	        chart.draw(data, options);
+	    }
+	    
+	    function drawChartIpv4_2( infos ) {
+
+	        var data = new google.visualization.DataTable();
+	        data.addColumn('string', 'Topping');
+	        data.addColumn('number', 'Slices');
+	        data.addRows([
+	            ['Conecta em outros paises IPV4', infos.percentrootServerOthersIPV4],
+	            ['Conecta no mesmo pais IPV4', infos.percentrootServerSameIPV4]
+	        ]);
+
+	        var options = {'title':'Se conectam em paises diferentes quando usando IPv4',
+	            'width':600,
+	            'height':400};
+
+	        var chart = new google.visualization.PieChart(document.getElementById('piechartipv4_2'));
+	        chart.draw(data, options);
+	    }
+	    
+	    function drawChartIpv6_2( infos ) {
+
+	        var data = new google.visualization.DataTable();
+	        data.addColumn('string', 'Topping');
+	        data.addColumn('number', 'Slices');
+	        data.addRows([
+	            ['Conecta em outros paises IPV6', infos.percentrootServerOthersIPV6],
+	            ['Conecta no mesmo pais IPV6', infos.percentrootServerSameIPV6]
+	        ]);
+
+	        var options = {'title':'Se conectam em paises diferentes quando usando IPv6',
+	            'width':600,
+	            'height':400};
+
+	        var chart = new google.visualization.PieChart(document.getElementById('piechartipv6_2'));
+	        chart.draw(data, options);
+	    }
+	    
+	    function drawChartIpv4_3( infos ) {
+
+	        var data = new google.visualization.DataTable();
+	        data.addColumn('string', 'Topping');
+	        data.addColumn('number', 'Slices');
+	        data.addRows([
+	            ['Conecta em outros paises IPV4', infos.percentOthersIPV4],
+	            ['Conecta no mesmo pais IPV4', infos.percentSameIPV4]
+	        ]);
+
+	        var options = {'title':'Conecta em paises diferentes dependendo da versao do protocolo IP (IPV4)',
+	            'width':600,
+	            'height':400};
+
+	        var chart = new google.visualization.PieChart(document.getElementById('piechartipv4_3'));
+	        chart.draw(data, options);
+	    }
+	    
+	    function drawChartIpv6_3( infos ) {
+
+	        var data = new google.visualization.DataTable();
+	        data.addColumn('string', 'Topping');
+	        data.addColumn('number', 'Slices');
+	        data.addRows([
+	            ['Conecta em outros paises IPV6', infos.percentOthersIPV6],
+	            ['Conecta no mesmo pais IPV6', infos.percentSameIPV6]
+	        ]);
+
+	        var options = {'title':'Conecta em paises diferentes dependendo da versao do protocolo IP (IPV6)',
+	            'width':600,
+	            'height':400};
+
+	        var chart = new google.visualization.PieChart(document.getElementById('piechartipv6_3'));
+	        chart.draw(data, options);
+	    }
 
 	    function mountReport() {
 	    	
@@ -102,8 +199,12 @@
     			  if (err !== null) {
     			    alert('Erro ao processar os dados');
     			  } else {
-    				  drawChart(data);
-    				  drawColumnChart(data);
+    				  drawChartIpv4(data);
+    				  drawChartIpv6(data);
+    				  drawChartIpv4_2(data);
+    				  drawChartIpv6_2(data);
+    				  drawChartIpv4_3(data);
+    				  drawChartIpv6_3(data);
     			  }
     			});
 	    }

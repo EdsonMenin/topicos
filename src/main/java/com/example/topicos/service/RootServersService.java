@@ -425,6 +425,9 @@ public class RootServersService {
 		Map<Long, String> prob = new HashMap<Long, String>();
 		Map<String, String> iata = new HashMap<String, String>();
 		
+		Map<Long, String> ipv4 = new HashMap<Long, String>();
+		Map<Long, String> ipv6 = new HashMap<Long, String>();
+		
 		for (int i = 0 ; i < objects.length(); i++) {
 			
 			JSONObject obj = objects.getJSONObject(i);
@@ -451,18 +454,29 @@ public class RootServersService {
 			iata.put( iataCode, isoCountry);
 		}
 		
-		JSONObject ret =				new JSONObject();
-		JSONObject infos = 				new JSONObject();
+		JSONObject ret = new JSONObject();
 		
-		List<Long> probIPV4 =			new ArrayList<Long>();
-		List<Long> probIPV6 =			new ArrayList<Long>();
-		List<String> servers = 			new ArrayList<String>();
-		List<String> distinctServers = 	new ArrayList<String>();
+		Long probsIPV4 = 0l;
+		Long probsIPV6 = 0l;
 		
-		Long quantResultsIPV4 = 0l;
-		Long quantResultsIPV6 = 0l;
-		Long failResultsIPV4 = 0l;
-		Long failResultsIPV6 = 0l;
+		Double rootServerOtherIPV4 = 0.0;
+		Double rootServerOtherIPV6 = 0.0;
+		Double rootServerSameIPV4 = 0.0;
+		Double rootServerSameIPV6 = 0.0;
+		
+		Double probsOtherIPV4 = 0.0;
+		Double probsOtherIPV6 = 0.0;
+		Double probsSameIPV4 = 0.0;
+		Double probsSameIPV6 = 0.0;
+		
+		List<Long> probIPV4 =					new ArrayList<Long>();
+		List<Long> probIPV6 =					new ArrayList<Long>();
+		List<Long> probIPV4valid =				new ArrayList<Long>();
+		List<Long> probIPV6valid =				new ArrayList<Long>();
+		List<Long> serversSameCountriesIPV4 = 	new ArrayList<Long>();
+		List<Long> serversOtherCountriesIPV4 =	new ArrayList<Long>();
+		List<Long> serversSameCountriesIPV6 = 	new ArrayList<Long>();
+		List<Long> serversOtherCountriesIPV6 = 	new ArrayList<Long>();
 
 	    for (int i = 0 ; i < responseIpv4.length(); i++) {
 	    	
@@ -478,21 +492,18 @@ public class RootServersService {
 	        JSONObject result = obj.has("result") ? obj.getJSONObject("result") : new JSONObject();
 	        
 	        if( result.isEmpty() ) {
-	        	failResultsIPV4++;
 	        	continue;
 	        }
 	        
 	        JSONArray answers  = result.has("answers") ? result.getJSONArray("answers") : new JSONArray();
 	        
 	        if( answers.isEmpty() ) {
-	        	failResultsIPV4++;
 	        	continue;
 	        }
 	        
 	        JSONObject arrAnsewrs = answers.getJSONObject(0);
 	        
 	        if( arrAnsewrs.isEmpty() ) {
-	        	failResultsIPV4++;
 	        	continue;
 	        }
 	        
@@ -501,14 +512,21 @@ public class RootServersService {
 	        serverName = adjustmentServerName( rootServer, serverName );
 	        
 	        if ( serverName == null ){
-	        	failResultsIPV4++;
 	        	continue;
 	        }
 
-	        servers.add(serverName);
+	        String countryCode = prob.get(prb_id);
+	        String isoCountry = iata.get(serverName.toUpperCase());
 	        
-	        quantResultsIPV4++;
+	        if ( countryCode == null || isoCountry == null ) continue;
 	        
+	        if( isoCountry.equals(countryCode)) serversSameCountriesIPV4.add(prb_id);
+	        else serversOtherCountriesIPV4.add(prb_id);
+	        
+	        probIPV4valid.add(prb_id);
+	        probsIPV4++;
+	        
+	        ipv4.put(prb_id, countryCode);
 	    }
 	    
 	    for (int i = 0 ; i < responseIpv6.length(); i++) {
@@ -524,21 +542,18 @@ public class RootServersService {
 	        probIPV6.add(prb_id);
 	        
 	        if( result.isEmpty() ) {
-	        	failResultsIPV6++;
 	        	continue;
 	        }
 	        
 	        JSONArray answers  = result.has("answers") ? result.getJSONArray("answers") : new JSONArray();
 	        
 	        if( answers.isEmpty() ) {
-	        	failResultsIPV6++;
 	        	continue;
 	        }
 	        
 	        JSONObject arrAnsewrs = answers.getJSONObject(0);
 	        
 	        if( arrAnsewrs.isEmpty() ) {
-	        	failResultsIPV6++;
 	        	continue;
 	        }
 	        
@@ -547,28 +562,94 @@ public class RootServersService {
 	        serverName = adjustmentServerName( rootServer, serverName );
 	        
 	        if ( serverName == null ){
-	        	failResultsIPV6++;
 	        	continue;
 	        }
 	        
-	        servers.add(serverName);
+	        String countryCode = prob.get(prb_id);
+	        String isoCountry = iata.get(serverName.toUpperCase());
 	        
-	        quantResultsIPV6++;
+	        if ( countryCode == null || isoCountry == null ) continue;
+	        
+	        if( isoCountry.equals(countryCode)) serversSameCountriesIPV6.add(prb_id);
+	        else serversOtherCountriesIPV6.add(prb_id);
+	        
+	        probIPV6valid.add(prb_id);
+	        probsIPV6++;
+	        
+	        ipv6.put(prb_id, countryCode);
 	    }
 	    
-	    distinctServers = servers.stream()
-				                 .distinct()
-				                 .collect(Collectors.toList());
+	    for( Long probIpv4 : probIPV4valid ) {
+	    	
+	    	if( serversSameCountriesIPV6.contains(probIpv4) ) {
+	    		probsOtherIPV4++;
+	    	}
+	    	else {
+	    		probsSameIPV4++;
+	    	}
+	    	
+	    	String compareCountryIPV4 = ipv4.get(probIpv4);
+	    	String compareCountryIPV6 = ipv6.get(probIpv4);
+	    	
+	    	if( compareCountryIPV4.equals(compareCountryIPV6) ) {
+	    		rootServerSameIPV4++;
+	    	}
+	    	else {
+	    		rootServerOtherIPV4++;
+	    	}
+	    }
 	    
-	    infos.put("quantResultsIPV4", 	quantResultsIPV4);
-	    infos.put("quantResultsIPV6", 	quantResultsIPV6);
-	    infos.put("quantResultsTotal", 	quantResultsIPV4 + quantResultsIPV6);
-	    infos.put("failResultsIPV4", 	failResultsIPV4);
-	    infos.put("failResultsIPV6", 	failResultsIPV6);
-	    infos.put("quantFailsTotal", 	failResultsIPV4 + failResultsIPV6);
+	    for( Long probIpv6 : probIPV6valid ) {
+	    	
+	    	if( serversSameCountriesIPV4.contains(probIpv6) ) {
+	    		probsOtherIPV6++;
+	    	}
+	    	else {
+	    		probsSameIPV6++;
+	    	}
+	    	
+	    	String compareCountryIPV4 = ipv4.get(probIpv6);
+	    	String compareCountryIPV6 = ipv6.get(probIpv6);
+	    	
+	    	if( compareCountryIPV6.equals(compareCountryIPV4) ) {
+	    		rootServerSameIPV6++;
+	    	}
+	    	else {
+	    		rootServerOtherIPV6++;
+	    	}
+	    }
+	    //Questão 1
+	    Double percentSameContriesIPV4 = (( probsIPV4.doubleValue() - serversSameCountriesIPV4.size() ) / probsIPV4.doubleValue()) * 100;
+	    Double percentOtherContriesIPV4 = (( probsIPV4.doubleValue() - serversOtherCountriesIPV4.size() ) / probsIPV4.doubleValue()) * 100;
+	    Double percentSameContriesIPV6 = (( probsIPV6.doubleValue() - serversSameCountriesIPV6.size() ) / probsIPV6.doubleValue()) * 100;
+	    Double percentOtherContriesIPV6 = (( probsIPV6.doubleValue() - serversOtherCountriesIPV6.size() ) / probsIPV6.doubleValue()) * 100;
 	    
-	    ret.put("infos", 			infos);
-	    ret.put("distinctServers", 	mountDistinctServers(servers, distinctServers));
+	    //Questão 2
+	    Double percentrootServerOthersIPV4 = ( rootServerOtherIPV4 / probIPV4valid.size()) * 100;
+	    Double percentrootServerSameIPV4 = ( rootServerSameIPV4 / probIPV4valid.size()) * 100;
+	    Double percentrootServerOthersIPV6 = ( rootServerOtherIPV6 / probIPV6valid.size()) * 100;
+	    Double percentrootServerSameIPV6 = ( rootServerSameIPV6 / probIPV6valid.size()) * 100;
+	    
+	    //Questão 3
+	    Double percentOthersIPV4 = ( probsOtherIPV4 / probIPV4valid.size()) * 100;
+	    Double percentSameIPV4 = ( probsSameIPV4 / probIPV4valid.size()) * 100;
+	    Double percentOthersIPV6 = ( probsOtherIPV6 / probIPV6valid.size()) * 100;
+	    Double percentSameIPV6 = ( probsSameIPV6 / probIPV6valid.size()) * 100;
+	    
+	    ret.put("percentSameContriesIPV4", percentSameContriesIPV4);
+	    ret.put("percentOtherContriesIPV4", percentOtherContriesIPV4);
+	    ret.put("percentSameContriesIPV6", percentSameContriesIPV6);
+	    ret.put("percentOtherContriesIPV6", percentOtherContriesIPV6);
+	    
+	    ret.put("percentrootServerOthersIPV4", percentrootServerOthersIPV4);
+	    ret.put("percentrootServerSameIPV4", percentrootServerSameIPV4);
+	    ret.put("percentrootServerOthersIPV6", percentrootServerOthersIPV6);
+	    ret.put("percentrootServerSameIPV6", percentrootServerSameIPV6);
+	    
+	    ret.put("percentOthersIPV4", percentOthersIPV4);
+	    ret.put("percentSameIPV4", percentSameIPV4);
+	    ret.put("percentOthersIPV6", percentOthersIPV6);
+	    ret.put("percentSameIPV6", percentSameIPV6);
 		
 		return ret.toString();
 	}
